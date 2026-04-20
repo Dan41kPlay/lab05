@@ -13,6 +13,8 @@ jobs:
         os: [ubuntu-latest]
 
     runs-on: ${{matrix.os}}
+    env:
+      CXX: g++
     steps:
     - uses: actions/checkout@v6
 
@@ -28,7 +30,8 @@ jobs:
       run: cmake --build ${{github.workspace}}/build
 
     - name: project_run_tests
-      run: ${{github.workspace}}/build/ctest --output-on-failure
+      working-directory: build
+      run: ctest --output-on-failure
 
     - name: Coveralls
       uses: coverallsapp/github-action@v2
