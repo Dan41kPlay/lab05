@@ -10,7 +10,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
 
     runs-on: ${{matrix.os}}
     steps:
@@ -21,6 +21,9 @@ jobs:
 
     - name: project_build
       run: cmake --build ${{github.workspace}}/build
+
+    - name: project_run_tests
+      run: ./build/check
 
     - name: Coveralls
       uses: coverallsapp/github-action@v2

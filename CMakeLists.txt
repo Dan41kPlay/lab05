@@ -12,7 +12,7 @@ target_include_directories(banking PUBLIC banking)
 
 if(BUILD_TESTS)
 	enable_testing()
-	add_subdirectory(third-party/googletest)
+	add_subdirectory(extern/googletest)
 	add_executable(check tests/test.cpp)
 	target_link_libraries(check banking gtest_main gmock_main)
 	add_test(NAME check COMMAND check)
