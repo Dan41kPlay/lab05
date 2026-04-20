@@ -17,13 +17,13 @@ jobs:
     - uses: actions/checkout@v6
 
     - name: project_configure
-      run: cmake ${{github.workspace}} -B ${{github.workspace}}/build
+      run: cmake ${{github.workspace}} -B ${{github.workspace}}/build -D BUILD_TESTS=ON
 
     - name: project_build
       run: cmake --build ${{github.workspace}}/build
 
     - name: project_run_tests
-      run: ls build -a
+      run: ${{github.workspace}}/build/check
 
     - name: Coveralls
       uses: coverallsapp/github-action@v2
