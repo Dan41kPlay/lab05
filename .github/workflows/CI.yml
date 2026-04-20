@@ -23,7 +23,7 @@ jobs:
       run: cmake --build ${{github.workspace}}/build
 
     - name: project_run_tests
-      run: ls -a
+      run: ls build -a
 
     - name: Coveralls
       uses: coverallsapp/github-action@v2
