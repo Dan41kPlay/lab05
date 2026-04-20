@@ -17,13 +17,18 @@ jobs:
     - uses: actions/checkout@v6
 
     - name: project_configure
-      run: cmake ${{github.workspace}} -B ${{github.workspace}}/build -D BUILD_TESTS=ON
+      run: |
+        cmake ${{github.workspace}} \
+          -B ${{github.workspace}}/build \
+          -D BUILD_TESTS=ON \
+          -D CMAKE_CXX_FLAGS="--coverage" \
+          -D CMAKE_EXE_LINKER_FLAGS="--coverage"
 
     - name: project_build
       run: cmake --build ${{github.workspace}}/build
 
     - name: project_run_tests
-      run: ${{github.workspace}}/build/check
+      run: ${{github.workspace}}/build/ctest --output-on-failure
 
     - name: Coveralls
       uses: coverallsapp/github-action@v2
