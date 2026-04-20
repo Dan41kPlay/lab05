@@ -11,9 +11,18 @@ add_library(banking STATIC banking/Account.cpp banking/Transaction.cpp)
 target_include_directories(banking PUBLIC banking)
 
 if(BUILD_TESTS)
+	# partially source: https://google.github.io/googletest/quickstart-cmake.html
+	include(FetchContent)
+	FetchContent_Declare(
+		googletest
+		URL https://github.com
+	)
+	# For Windows compatibility, set gtest_force_shared_crt
+	set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+	FetchContent_MakeAvailable(googletest)
 	enable_testing()
-	add_subdirectory(extern/googletest)
 	add_executable(check tests/test.cpp)
-	target_link_libraries(check banking gtest_main gmock_main)
-	add_test(NAME check COMMAND check)
+	target_link_libraries(check banking GTest::gtest_main GTest::gmock_main)
+	include(GoogleTest)
+	gtest_discover_tests(check)
 endif()
