@@ -4,8 +4,18 @@
 
 ### Задание
 1. Создайте `CMakeList.txt` для библиотеки *banking*.
+
+See the file [CMakeLists.txt](CMakeLists.txt)
+File already includes test building (with a BUILD_TESTS flag)
+
 2. Создайте модульные тесты на классы `Transaction` и `Account`.
     * Используйте mock-объекты.
     * Покрытие кода должно составлять 100%.
-3. Настройте сборочную процедуру на **TravisCI**.
+
+See the file [test.cpp](tests/test.cpp)
+
+3. Настройте сборочную процедуру на ~~**TravisCI**~~ **GitHub Actions**.
+
+See the [file](github/workflows.yml) for GitHub Actions CI
+
 4. Настройте [Coveralls.io](https://coveralls.io/).
