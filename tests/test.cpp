@@ -17,20 +17,6 @@ public:
 	MOCK_METHOD3(Make, bool(Account& from, Account& to, int sum));
 };
 
-TEST(Account, Mock) {
-	AccountMock acc(1, 100);
-	EXPECT_CALL(acc, GetBalance()).Times(1);
-	EXPECT_CALL(acc, ChangeBalance(testing::_)).Times(2);
-	EXPECT_CALL(acc, Lock()).Times(2);
-	EXPECT_CALL(acc, Unlock()).Times(1);
-	acc.GetBalance();
-	acc.ChangeBalance(100); // throw
-	acc.Lock();
-	acc.ChangeBalance(100);
-	acc.Lock(); // throw
-	acc.Unlock();
-}
-
 TEST(Account, SimpleTest) {
 	Account acc(1, 100);
 	EXPECT_EQ(acc.id(), 1);
@@ -40,21 +26,6 @@ TEST(Account, SimpleTest) {
 	acc.ChangeBalance(100);
 	EXPECT_EQ(acc.GetBalance(), 200);
 	EXPECT_THROW(acc.Lock(), std::runtime_error);
-}
-
-TEST(Transaction, Mock) {
-	TransactionMock tr;
-	Account ac1(1, 50);
-	Account ac2(2, 500);
-	EXPECT_CALL(tr, Make(testing::_, testing::_, testing::_))
-	.Times(6);
-	tr.set_fee(100);
-	tr.Make(ac1, ac2, 199);
-	tr.Make(ac2, ac1, 500);
-	tr.Make(ac2, ac1, 300);
-	tr.Make(ac1, ac1, 0); // throw
-	tr.Make(ac1, ac2, -1); // throw
-	tr.Make(ac1, ac2, 99); // throw
 }
 
 TEST(Transaction, SimpleTest) {
@@ -69,4 +40,55 @@ TEST(Transaction, SimpleTest) {
 	EXPECT_FALSE(tr.Make(ac1, ac2, 199));
 	EXPECT_FALSE(tr.Make(ac2, ac1, 500));
 	EXPECT_TRUE(tr.Make(ac2, ac1, 300));
+}
+
+TEST(Transaction, Mock) {
+	using ::testing::InSequence;
+	using ::testing::Return;
+
+	Transaction tr;
+	tr.set_fee(100);
+
+	AccountMock ac1(1, 50);
+	AccountMock ac2(2, 500);
+
+	{
+		InSequence seq;
+
+		// error: fee*2 > sum
+		EXPECT_FALSE(tr.Make(ac1, ac2, 199));
+
+		// error: 500 < 600
+		// Guard
+		EXPECT_CALL(ac2, Lock());
+		EXPECT_CALL(ac1, Lock());
+		EXPECT_CALL(ac1, ChangeBalance(500));
+		EXPECT_CALL(ac2, GetBalance()).WillOnce(Return(500));
+		EXPECT_CALL(ac1, ChangeBalance(-500)); // rollback
+		// SaveToDataBase
+		EXPECT_CALL(ac2, GetBalance()).WillOnce(Return(500));
+		EXPECT_CALL(ac1, GetBalance()).WillOnce(Return(50));
+		// ~Guard
+		EXPECT_CALL(ac1, Unlock());
+		EXPECT_CALL(ac2, Unlock());
+		EXPECT_FALSE(tr.Make(ac2, ac1, 500));
+
+		// success: 500 >= 400
+		EXPECT_CALL(ac2, Lock());
+		EXPECT_CALL(ac1, Lock());
+		EXPECT_CALL(ac1, ChangeBalance(300));
+		EXPECT_CALL(ac2, GetBalance()).WillOnce(Return(500));
+		EXPECT_CALL(ac2, ChangeBalance(-400));
+		// SaveToDataBase
+		EXPECT_CALL(ac2, GetBalance()).WillOnce(Return(100)); // 500-400
+		EXPECT_CALL(ac1, GetBalance()).WillOnce(Return(350)); // 50+300
+		EXPECT_CALL(ac1, Unlock());
+		EXPECT_CALL(ac2, Unlock());
+		EXPECT_TRUE(tr.Make(ac2, ac1, 300));
+
+		// test errors
+		EXPECT_THROW(tr.Make(ac1, ac1, 0), std::logic_error);
+		EXPECT_THROW(tr.Make(ac1, ac2, -1), std::invalid_argument);
+		EXPECT_THROW(tr.Make(ac1, ac2, 99), std::logic_error);
+	}
 }
