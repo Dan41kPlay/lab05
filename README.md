@@ -17,12 +17,13 @@ See the file [test.cpp](tests/test.cpp)
 
 3. Настройте сборочную процедуру на ~~**TravisCI**~~ **GitHub Actions**.
 
-See the [file](github/workflows.yml) for GitHub Actions CI
+See the [file](github/workflows/CI.yml) for GitHub Actions CI
 
 File already has code for Coveralls
 
 4. Настройте [Coveralls.io](https://coveralls.io/).
 
+[![Tests](https://github.com/Dan41kPlay/lab05/actions/workflows/CI.yml/badge.svg)](https://github.com/Dan41kPlay/lab05/actions/workflows/CI.yml)
 [![Coverage Status](https://coveralls.io/repos/github/Dan41kPlay/lab05/badge.svg?branch=main)](https://coveralls.io/github/Dan41kPlay/lab05?branch=main)
 
 > finally it works!! I spent 4 hours troubleshooting...
